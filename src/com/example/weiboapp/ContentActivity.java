@@ -1,5 +1,8 @@
 package com.example.weiboapp;
 
+import java.util.List;
+
+import com.example.weiboapp.adapter.CommentAdapters;
 import com.example.weiboapp.util.AsyncImageLoader;
 import com.example.weiboapp.util.tools;
 import com.example.weiboapp.util.AsyncImageLoader.ImageCallback;
@@ -12,19 +15,30 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+import weibo4j.model.Comment;
 import weibo4j.model.CommentWapper;
+import weibo4j.model.Paging;
 import weibo4j.model.Status;
 import weibo4j.model.User;
 
 public class ContentActivity extends Activity {
+	
+	ListView comment_lv;
+	public int nowpage=1;    // 第几页
+	public int pagesize=20;    // 每页条数
+	public String id = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.content);
+		comment_lv = (ListView)findViewById(R.id.comments_lv);
 		Intent in = this.getIntent();
 		if(in!=null) {
 			Bundle b = in.getExtras();
@@ -38,8 +52,12 @@ public class ContentActivity extends Activity {
 	}
 	public void init(String weiboID) {
 		Status data = tools.getInstance().loadShow(weiboID);
-		String id = data.getId();
-		CommentWapper comment = tools.getInstance().getComents(id);
+		
+		id = data.getId();
+		Paging p = new Paging(nowpage,pagesize);
+		List<Comment> commentlv = tools.getInstance().getComents(id,p).getComments();
+		CommentAdapters adapter = new CommentAdapters(this,commentlv);
+		
 		if(data!=null) {
 			// 获得微博发送者信息
 			User user = data.getUser();
@@ -98,7 +116,24 @@ public class ContentActivity extends Activity {
 			
 			
 		}
+		
+		comment_lv.setAdapter(adapter);
+		comment_lv.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				// TODO Auto-generated method stub
+				if(arg3==-1) {    // 更多
+					nowpage++;
+					Paging p = new Paging(nowpage,pagesize);
+					List<Comment> moreComment = tools.getInstance().getComents(id, p).getComments();
+					((CommentAdapters)comment_lv.getAdapter()).addMoreData(moreComment);
+				}
+				}
+		});
+		
 	}
+
 	
 	/**
 	 * 动态调整图片宽高

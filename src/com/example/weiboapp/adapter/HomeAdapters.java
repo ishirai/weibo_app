@@ -59,7 +59,7 @@ public class HomeAdapters extends BaseAdapter {
 	@Override
 	public long getItemId(int arg0) {
 		if(arg0<this.getCount()-1) {
-			return arg0-1;
+			return arg0;
 		}else {
 			return -1;    // 最后一项 加载更多
 		}

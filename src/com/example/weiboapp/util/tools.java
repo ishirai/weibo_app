@@ -62,10 +62,10 @@ public class tools {
 	 * @param id
 	 * @return
 	 */
-	public CommentWapper getComents(String id) {
+	public CommentWapper getComents(String id, Paging p) {
 		Comments cm = new Comments(access_token);
 		try {
-			CommentWapper comments = cm.getCommentById(id);
+			CommentWapper comments = cm.getCommentById(id, p, null);
 			return comments;
 			// Log.logInfo(comment.toString());
 		} catch (WeiboException e) {
